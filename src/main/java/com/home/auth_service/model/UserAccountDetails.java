@@ -1,22 +1,23 @@
 package com.home.auth_service.model;
 
-import com.home.auth_service.model.enums.Status;
+import com.home.auth_service.model.enums.UserAccountStatus;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
+@Getter
 public class UserAccountDetails implements UserDetails {
 
     private final String username;
     private final String password;
-    private final Set<SimpleGrantedAuthority> authorities;
+    private final List<SimpleGrantedAuthority> authorities;
     private final boolean isActive;
 
-    public UserAccountDetails(String username, String password, Set<SimpleGrantedAuthority> authorities, boolean isActive) {
+    public UserAccountDetails(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive) {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
@@ -25,9 +26,10 @@ public class UserAccountDetails implements UserDetails {
 
     public static UserAccountDetails fromUserAccount(UserAccount userAccount) {
         return new UserAccountDetails(
-                userAccount.getEmail(), userAccount.getPassword(),
-                userAccount.getRole().getAuthorities(),
-                userAccount.getStatus().equals(Status.ACTIVE)
+                userAccount.getUsername(),
+                userAccount.getPassword(),
+                List.copyOf(userAccount.getRole().getAuthorities()),
+                userAccount.getUserAccountStatus().equals(UserAccountStatus.ACTIVE)
         );
     }
 

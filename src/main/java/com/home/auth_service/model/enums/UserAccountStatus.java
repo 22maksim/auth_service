@@ -1,5 +1,5 @@
 package com.home.auth_service.model.enums;
 
-public enum Status {
+public enum UserAccountStatus {
     ACTIVE, BANNED;
 }

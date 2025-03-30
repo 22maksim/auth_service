@@ -18,11 +18,7 @@ public class UserAccountRequestDto {
 
     @Size(min = 4, max = 255)
     @NotBlank
-    private String firstname;
-
-    @Size(min = 4, max = 255)
-    @NotBlank
-    private String lastname;
+    private String username;
 
     @Size(min = 4, max = 255)
     @NotBlank

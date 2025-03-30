@@ -1,11 +1,12 @@
 package com.home.auth_service.model;
 
 import com.home.auth_service.model.enums.RoleUser;
-import com.home.auth_service.model.enums.Status;
+import com.home.auth_service.model.enums.UserAccountStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,13 +17,10 @@ import java.time.Instant;
 public class UserAccount {
 
     @Id
-    private Long id;
+    private UUID id;
 
-    @Column(name = "firstname", nullable = false)
-    private String firstname;
-
-    @Column(name = "lastname", nullable = false)
-    private String lastname;
+    @Column(name = "username", nullable = false)
+    private String username;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -36,7 +34,7 @@ public class UserAccount {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    private UserAccountStatus userAccountStatus;
 
     @Column(name = "created_at")
     private Instant createdAt;

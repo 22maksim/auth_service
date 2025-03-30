@@ -48,8 +48,7 @@ public class AuthController {
 
     @PostMapping("/recover-password")
     public ResponseEntity<UserAccountResponseDto> recoverPassword(
-            @RequestParam(name = "firstname") @NotBlank @Size(min = 4, max = 255) String firstname,
-            @RequestParam(name = "lastname") @NotBlank @Size(min = 4, max = 255) String lastname,
+            @RequestParam(name = "username") @NotBlank @Size(min = 4, max = 255) String username,
             @RequestParam(name = "email") @NotBlank @Size(min = 8, max = 255) String email
     ) {
 

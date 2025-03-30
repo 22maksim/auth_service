@@ -21,14 +21,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserAccount userAccount = userAccountRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserAccount userAccount = userAccountRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "This user with this email address was not found. Email: " + email));
+                        "This user with this username address was not found. Username: " + username));
         return UserAccountDetails.fromUserAccount(userAccount);
     }
 
     public UserAccountResponseDto registerUser(UserAccountRequestDto requestDto) {
+        UserAccount userAccount = new UserAccount();
+
         return null;
     }
 }

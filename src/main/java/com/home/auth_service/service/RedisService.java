@@ -1,0 +1,69 @@
+package com.home.auth_service.service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
+@Service
+public class RedisService {
+
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final Long EXPIRATION_TIME =
+            System.getenv("EXPIRATION_TIME") != null
+                    ? Long.parseLong(System.getenv("EXPIRATION_TIME")) : 3600L;
+
+    public RedisService(@Qualifier("redisTemplateCustom") RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    public void addTokenToBlackList(HttpServletRequest request) {
+        if (request.getHeader("Authorization") != null) {
+            String token = request.getHeader("Authorization").substring(7);
+            String username = JwtUtil.extractUsername(token);
+            putTokenBlackListByUsername(username, token);
+            log.info("Added token to blacklist. Username: {}", username);
+        } else {
+            log.warn(
+                    "No Authorization header found in request. Bad added token to blacklist. Request: {}",
+                    request.getHeaderNames()
+            );
+        }
+    }
+
+    public boolean existsTokenByUsername(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+        return redisTemplate.hasKey(username);
+    }
+
+    public String getTokenByUsername(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+        return redisTemplate.opsForValue().get(username);
+    }
+
+    public void removeTokenByUsername(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+        if (redisTemplate.delete(username)) {
+            log.info("Remove and restored token by username: {}", username);
+        }
+    }
+
+    private void putTokenBlackListByUsername(String username, String token) {
+        if (username == null || token == null) {
+            throw new IllegalArgumentException("email and token cannot be null");
+        }
+        if (Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(username, token, EXPIRATION_TIME, TimeUnit.SECONDS))) {
+            log.info("Set token blacklist for email: {}", username);
+        }
+    }
+}

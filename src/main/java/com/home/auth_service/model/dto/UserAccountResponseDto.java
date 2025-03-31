@@ -1,9 +1,11 @@
 package com.home.auth_service.model.dto;
 
+import com.home.auth_service.model.UserAccount;
 import com.home.auth_service.model.enums.RoleUser;
 import com.home.auth_service.model.enums.UserAccountStatus;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -12,11 +14,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAccountResponseDto {
+
     private UUID id;
     private String username;
     private String email;
     private RoleUser role;
     private UserAccountStatus userAccountStatus;
-    private String createdAt;
-    private String updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
+
 }

@@ -4,7 +4,9 @@ import com.home.auth_service.model.UserAccount;
 import com.home.auth_service.model.UserAccountDetails;
 import com.home.auth_service.model.dto.UserAccountRequestDto;
 import com.home.auth_service.model.dto.UserAccountResponseDto;
+import com.home.auth_service.model.enums.UserAccountStatus;
 import com.home.auth_service.repository.UserAccountRepository;
+import com.home.auth_service.utils.CustomMappings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,8 +31,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public UserAccountResponseDto registerUser(UserAccountRequestDto requestDto) {
-        UserAccount userAccount = new UserAccount();
+        UserAccount userAccount = UserAccount.builder()
+                .username(requestDto.getUsername())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .email(requestDto.getEmail())
+                .userAccountStatus(UserAccountStatus.ACTIVE)
+                .role(requestDto.getRole())
+                .build();
 
-        return null;
+        userAccountRepository.save(userAccount);
+
+        return CustomMappings.userAccountToAccountResponseDto(userAccount);
     }
 }

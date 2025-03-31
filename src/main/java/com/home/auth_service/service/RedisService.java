@@ -1,5 +1,6 @@
 package com.home.auth_service.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,14 +21,18 @@ public class RedisService {
         this.redisTemplate = redisTemplate;
     }
 
-    public void putTokenBlackListByUsername(String username, String token) {
-        if (username == null || token == null) {
-            throw new IllegalArgumentException("email and token cannot be null");
+    public void addTokenToBlackList(HttpServletRequest request) {
+        if (request.getHeader("Authorization") != null) {
+            String token = request.getHeader("Authorization").substring(7);
+            String username = JwtUtil.extractUsername(token);
+            putTokenBlackListByUsername(username, token);
+            log.info("Added token to blacklist. Username: {}", username);
+        } else {
+            log.warn(
+                    "No Authorization header found in request. Bad added token to blacklist. Request: {}",
+                    request.getHeaderNames()
+            );
         }
-        if (Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(username, token, EXPIRATION_TIME, TimeUnit.SECONDS))) {
-            log.info("Set token blacklist for email: {}", username);
-        }
-
     }
 
     public boolean existsTokenByUsername(String username) {
@@ -50,6 +55,15 @@ public class RedisService {
         }
         if (redisTemplate.delete(username)) {
             log.info("Remove and restored token by username: {}", username);
+        }
+    }
+
+    private void putTokenBlackListByUsername(String username, String token) {
+        if (username == null || token == null) {
+            throw new IllegalArgumentException("email and token cannot be null");
+        }
+        if (Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(username, token, EXPIRATION_TIME, TimeUnit.SECONDS))) {
+            log.info("Set token blacklist for email: {}", username);
         }
     }
 }

@@ -1,8 +1,6 @@
 package com.home.auth_service.config;
 
-import com.home.auth_service.service.JwtUtil;
 import com.home.auth_service.service.RedisService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,15 +26,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/security/register/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/security/register/user/**").hasAuthority("permission:write")
+                        .requestMatchers("/api/v1/security/register/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/security/register/user").hasAuthority("permission:write")
                         .requestMatchers("/api/v1/security/login").permitAll()
                         .requestMatchers("/api/v1/security/logout").permitAll()
                         .requestMatchers("/api/v1/security/recover-password").permitAll()
                         .anyRequest().authenticated())
                 .logout(logout -> logout.logoutUrl("/api/v1/security/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            addTokenToBlackList(request);
+
+                            redisService.addTokenToBlackList(request);
+
                             response.sendRedirect("/api/v1/security/login");
                             response.setStatus(HttpServletResponse.SC_OK);
                         }))
@@ -47,19 +47,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    private void addTokenToBlackList(HttpServletRequest request) {
-        if (request.getHeader("Authorization") != null) {
-            String token = request.getHeader("Authorization").substring(7);
-            String username = JwtUtil.extractUsername(token);
-            redisService.putTokenBlackListByUsername(username, token);
-            log.info("Added token to blacklist. Username: {}", username);
-        } else {
-            log.warn(
-                    "No Authorization header found in request. Bad added token to blacklist. Request: {}",
-                    request.getHeaderNames()
-            );
-        }
-    }
-
 }

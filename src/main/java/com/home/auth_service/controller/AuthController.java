@@ -26,6 +26,11 @@ import java.util.Map;
 public class AuthController {
     private final UserDetailsServiceImpl userDetailsServiceImpl;
 
+    /**
+     *
+     * @param requestDto
+     * @return
+     */
     @PostMapping("/register/user")
     public ResponseEntity<UserAccountResponseDto> registerUser(
             @RequestBody @Valid @NotNull UserAccountRequestDto requestDto
